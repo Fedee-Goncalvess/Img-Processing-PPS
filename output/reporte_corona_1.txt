@@ -1,0 +1,18 @@
+
+=======================================================
+ MÓDULO GENERAR OUTPUT: STITCHING SCAN (Corona #1)
+=======================================================
+
+[STITCHING] Procesando 5 imágenes ordenadas (backend: opencv)...
+
+[REPORTE DE STITCHING]
+✅ UTILIZADAS (5/5):
+  -> corona_1_img_1.jpg
+  -> corona_1_img_2.jpg
+  -> corona_1_img_3.jpg
+  -> corona_1_img_4.jpg
+  -> corona_1_img_5.jpg
+
+✅ Todas las imágenes fueron integradas exitosamente.
+
+[ÉXITO] Stitching guardado en: f:\backup_fedora_btrfs\root\home\fede\Documentos\Ingenieria\PPS\Img-Processing-PPS\output\composicion_corona_1.jpg
