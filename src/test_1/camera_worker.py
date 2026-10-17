@@ -57,14 +57,45 @@ class VisionUtils:
 
 
 class CameraWorker:
+
     def __init__(self, camera_index=0):
         self.driver = CameraDriver(camera_index)
         self.driver.conectar()
-        self.modo_actual = "EN VIVO"
+        self.modo_actual = "CAMARA ACTIVA"
         self.vision = VisionUtils()
         self.hud = HUDOvertlay()
+        
 
-    def obtener_frame_procesado(self, titulo= "SISTEMA DE VISIÓN", subtitulo= "Monitoreo activo"):
+        # Mapeo de parámetros ajustables de hardware
+        self.props = {
+            "Exposicion": cv2.CAP_PROP_EXPOSURE,
+            "Enfoque": cv2.CAP_PROP_FOCUS,
+            "Brillo": cv2.CAP_PROP_BRIGHTNESS,
+            "Contraste": cv2.CAP_PROP_CONTRAST,
+            "Ganancia": cv2.CAP_PROP_GAIN
+        }
+        self.valores_actuales = {k: 0 for k in self.props.keys()}
+        self._ultimo_slider = {k: self.obtener_valor_propiedad_driver(k) for k in self.props}
+
+    def obtener_valor_propiedad_driver(self, nombre_prop):
+        """Obtiene el valor actual de un parámetro desde el driver."""
+        prop_id = self.props.get(nombre_prop)
+        if prop_id is not None:
+            val = int(self.driver.get_propiedad(prop_id))
+            return max(0, min(val, 255))
+        return 0
+
+    def sincronizar_sliders(self, window_name):
+       for nombre, prop_id in self.props.items():
+           val = cv2.getTrackbarPos(nombre, window_name)
+           if val < 0 or self._ultimo_slider.get(nombre) == val:
+               continue                      # no se tocó: no escribir
+           self._ultimo_slider[nombre] = val
+           ok = self.driver.cap.set(prop_id, val)
+           leido = self.driver.get_propiedad(prop_id)
+           print(f"{nombre}: slider={val} | set={ok} | get={leido}")
+
+    def obtener_frame_procesado(self, titulo= " ", subtitulo= " "):
         ret, frame = self.driver.leer_frame_raw()
         if not ret or frame is None:
             return False, None
@@ -83,11 +114,28 @@ class CameraWorker:
 
         return True, frame
 
+    def obtener_frame_raw(self):
+            ret, frame = self.driver.leer_frame_raw()
+            if not ret or frame is None:
+                return False, None
+
+            return True, frame
+
     def ajustar_configuracion_manual(self, exposicion=None, enfoque= None):
         if exposicion is not None:
             self.driver.set_propiedad(cv2.CAP_PROP_EXPOSURE, exposicion)
         if enfoque is not None:
                     self.driver.set_propiedad(cv2.CAP_PROP_FOCUS, enfoque)   
+
+    def detectar_capacidades(self):
+        soportadas = {}
+        for nombre, prop in self.props.items():
+            original = self.driver.get_propiedad(prop)
+            self.driver.set_propiedad(prop, original + 1)
+            cambio = self.driver.get_propiedad(prop) != original
+            self.driver.set_propiedad(prop, original)
+            soportadas[nombre] = cambio
+        return soportadas
 
     def liberar_recursos(self):
         self.driver.desconectar()
