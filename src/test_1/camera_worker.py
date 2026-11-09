@@ -96,7 +96,7 @@ class CameraWorker:
            print(f"{nombre}: slider={val} | set={ok} | get={leido}")
 
     def obtener_frame_procesado(self, titulo= " ", subtitulo= " "):
-        ret, frame = self.driver.leer_frame_raw()
+        ret, frame = self.driver.get_frame()
         if not ret or frame is None:
             return False, None
 
@@ -115,7 +115,7 @@ class CameraWorker:
         return True, frame
 
     def obtener_frame_raw(self):
-            ret, frame = self.driver.leer_frame_raw()
+            ret, frame = self.driver.get_frame()
             if not ret or frame is None:
                 return False, None
 

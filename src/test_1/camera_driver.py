@@ -1,6 +1,5 @@
 import cv2
 import sys
-BACKEND = cv2.CAP_DSHOW if sys.platform == "win32" else cv2.CAP_V4L2
 
 class CameraDriver:
     def __init__(self, camera_index=0):
@@ -8,7 +7,7 @@ class CameraDriver:
         self.cap = None
 
     def conectar(self):
-        self.cap = cv2.VideoCapture(self.camera_index, BACKEND)
+        self.cap = cv2.VideoCapture(self.camera_index, cv2.CAP_DSHOW)
         
         if not self.cap.isOpened():
             self.cap = cv2.VideoCapture(self.camera_index)
@@ -22,7 +21,7 @@ class CameraDriver:
         
         return True    
 
-    def leer_frame_raw(self):
+    def get_frame(self):
         if self.cap and self.cap.isOpened():
             return self.cap.read()
         return False, None
